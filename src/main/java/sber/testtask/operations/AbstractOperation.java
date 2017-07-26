@@ -6,7 +6,7 @@ import sber.testtask.orders.Order;
 
 public abstract class AbstractOperation {
 
-    public String clientName;
+    protected String clientName;
 
     private Order order;
 
