@@ -9,20 +9,20 @@ public class OperationResolver {
     public AbstractOperation resolveOperation(String[] items) {
         String operation = items[1];
 
-        AbstractOperation iOp;
+        AbstractOperation op;
 
         switch (operation) {
             case "s":
-                iOp = new Sell(items[0], items[2], Integer.valueOf(items[3]), Integer.valueOf(items[4]));
+                op = new Sell(items[0], items[2], Integer.valueOf(items[3]), Integer.valueOf(items[4]));
                 break;
             case "b":
-                iOp = new Buy(items[0], items[2], Integer.valueOf(items[3]), Integer.valueOf(items[4]));
+                op = new Buy(items[0], items[2], Integer.valueOf(items[3]), Integer.valueOf(items[4]));
                 break;
             default:
                 throw new IllegalStateException("The operation " + operation + " is not supported.");
         }
 
-        return iOp;
+        return op;
 
     }
 }

@@ -1,28 +1,21 @@
 package sber.testtask.orders;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sber.testtask.OperationResolver;
 import sber.testtask.Processing;
 import sber.testtask.clients.Client;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-/*### Файл `orders.txt`
-
-Файл списка заявок имеет формат:
-
- * Имя клиента выставившего заявку
- * Символ операции: "s" - продажа или "b" - покупка.
- * Наименование ценной бумаги
- * Цена заявки (целое число за одну штуку ценной бумаги)
- * Количество продаваемых или покупаемых ценных бумаг
-*/
+import java.util.stream.Stream;
 
 public class Order {
+
+    private static Logger log = LoggerFactory.getLogger(Order.class);
 
     private Processing processing;
 
@@ -41,18 +34,43 @@ public class Order {
         this.quantity = quantity;
     }
 
-    private Map applyOrderForClient(String clientsPath) throws IOException {
-        Map orders = new HashMap<String, Client>();
+    public String getStock() { return stock; }
 
-        List<String> lines = Files.readAllLines(Paths.get(clientsPath));
-        for (String line : lines) {
-            String[] item = line.split("\t");
-            new OperationResolver().resolveOperation(item).addOrderToProcessing(processing);
+    public Integer getOrderPrice() { return orderPrice; }
+
+    public Integer getQuantity() { return quantity; }
+
+    private void applyOrderForClient(String ordersPath) throws IOException {
+        try(Stream<String> stream = Files.lines(Paths.get(ordersPath))) {
+            stream.forEach(lines -> {
+                String[] item = lines.split("\t");
+                new OperationResolver().resolveOperation(item).addOrderToProcessing(processing);
+            });
+        }
+        catch(IOException e) {
+            log.error("Cannot read from " + ordersPath, e);
+            throw new IOException(e);
         }
 
-        processing.getClients().writeResult("src/main/resources/result.txt");
+        writeResult("src/main/resources/result.txt");
+    }
 
-        return orders;
+    private void writeResult(String fileName) throws IOException {
+        StringBuilder sb = new StringBuilder();
+
+        Map<String, Client> clientsList = processing.getClients().getClientsList();
+        for (Map.Entry<String, Client> client : clientsList.entrySet()) {
+            sb.append(client.getValue().toString()).append("\r\n");
+        }
+
+        try (FileOutputStream fos = new FileOutputStream(fileName)) {
+            byte[] buff = sb.toString().getBytes();
+            fos.write(buff, 0, buff.length);
+        }
+        catch(IOException e) {
+            log.error("Cannot write to " + fileName, e);
+            throw new IOException(e);
+        }
     }
 
     @Override
@@ -61,18 +79,18 @@ public class Order {
         if (o == null || this.getClass() != o.getClass()) return false;
 
         Order order = (Order) o;
-        if (orderPrice != order.orderPrice) return false;
-        if (quantity != order.quantity) return false;
-
-        return stock.equals(order.stock);
-
+        return (orderPrice != null && orderPrice.equals(order.orderPrice) &&
+                quantity != null && quantity.equals(order.quantity) &&
+                stock != null && stock.equals(order.stock));
     }
 
     @Override
     public int hashCode() {
-        int prime = (int) Math.random();
-        int result = prime * stock.hashCode() + orderPrice;
-        result = prime * result + quantity;
+        int prime = 31;
+        int result = 17;
+        result = prime * result + (stock == null ? 0 : stock.hashCode());
+        result = prime * result + (orderPrice == null ? 0 : orderPrice.hashCode());
+        result = prime * result + (quantity == null ? 0 : quantity.hashCode());
         return result;
     }
 }

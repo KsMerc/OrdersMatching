@@ -6,21 +6,13 @@ import sber.testtask.orders.Order;
 
 public abstract class AbstractOperation {
 
-    String clientName;
-    String stock;
-    Integer price;
-    Integer quantity;
+    public String clientName;
 
-    Order order;
+    private Order order;
 
     public AbstractOperation(String clientName, String stock, Integer price, Integer quantity) {
         this.clientName = clientName;
-        this.stock = stock;
-        this.price = Integer.valueOf(price);
-        this.quantity = Integer.valueOf(quantity);
-
-        order = new Order(stock, price, quantity);
-
+        order = new Order(stock, Integer.valueOf(price), Integer.valueOf(quantity));
     }
 
     public Order getOrder() { return order;}

@@ -2,6 +2,9 @@ package sber.testtask.operations;
 
 import sber.testtask.Processing;
 import sber.testtask.clients.Client;
+import sber.testtask.clients.Stock;
+
+import java.util.Map;
 
 public class Buy extends AbstractOperation {
 
@@ -16,8 +19,10 @@ public class Buy extends AbstractOperation {
 
     public void applyOperation(Client clients) {
         Client client = clients.getClientByName(clientName);
+        Map<String, Stock> stocks = client.getStocks();
+        (stocks.get(getOrder().getStock())).increment(getOrder().getQuantity());
 
-        ((Client.Stock)client.getStocks().get(stock)).increment(quantity);
-        clients.getClientByName(clientName).clientBalanceUSD -= quantity * price;
+        Integer currentBalance = client.getClientBalanceUSD();
+        client.setClientBalanceUSD(currentBalance - getOrder().getQuantity() * getOrder().getOrderPrice());
     }
 }

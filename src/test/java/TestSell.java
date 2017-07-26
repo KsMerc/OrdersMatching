@@ -1,6 +1,7 @@
 import junit.framework.TestCase;
 import org.junit.Test;
 import sber.testtask.clients.Client;
+import sber.testtask.clients.Stock;
 
 public class TestSell extends TestCase {
 
@@ -14,10 +15,11 @@ public class TestSell extends TestCase {
         Integer quantity = 9;
         Integer price = 12;
 
-        ((Client.Stock)client.getStocks().get(stock)).decrement(quantity);
-        client.clientBalanceUSD += quantity * price;
+        ((Stock)client.getStocks().get(stock)).decrement(quantity);
+        Integer currentBalance = client.getClientBalanceUSD();
+        client.setClientBalanceUSD(currentBalance + quantity * price);
 
-        assertEquals(Integer.valueOf(7358), client.clientBalanceUSD);
+        assertEquals(Integer.valueOf(7358), client.getClientBalanceUSD());
         assertEquals("271", client.getStocks().get(stock).toString());
     }
 }
